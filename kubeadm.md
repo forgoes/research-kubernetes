@@ -29,7 +29,6 @@ sudo rm -rf $HOME/.kube
 
 # kubeadm init
 sudo kubeadm init --config kubeadm-config.yaml
-sudo kubeadm init --config kubeadm-config.yaml --pod-network-cidr=172.16.0.0/12
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -48,5 +47,12 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 watch kubectl get pods --all-namespaces
 kubectl cluster-info
 kubectl get nodes -o wide
+
+# install metallb for bare metal load balance
+# https://metallb.universe.tf/ 
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+
+kubectl apply -f metallb.yaml
 
 ```
