@@ -24,11 +24,12 @@ sudo ipvsadm --clear
 # remove configs
 sudo rm -rf $HOME/.kube
 
-
-
+# config cgroup
+# https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
 
 # kubeadm init
-sudo kubeadm init --pod-network-cidr=172.16.0.0/12
+sudo kubeadm init --config kubeadm-config.yaml
+sudo kubeadm init --config kubeadm-config.yaml --pod-network-cidr=172.16.0.0/12
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -42,5 +43,10 @@ kubectl apply -f kube-flannel.yml
 
 # schedule Pods on the control-plane node
 kubectl taint nodes --all node-role.kubernetes.io/master-
+
+# watch 
+watch kubectl get pods --all-namespaces
+kubectl cluster-info
+kubectl get nodes -o wide
 
 ```
