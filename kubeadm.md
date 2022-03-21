@@ -42,15 +42,13 @@ sudo curl -L "https://github.com/docker/compose/releases/download/v2.3.3/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 
 docker-compose --version
-
-reboot
 ```
 
 ## install kubeadm kubelet kubectl
 ```shell
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
-sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
 
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
@@ -70,6 +68,8 @@ echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https:/
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
+
+sudo reboot
 ```
 
 ## init
@@ -94,6 +94,13 @@ sudo rm -rf $HOME/.kube
 # kubeadm init
 # config cgroup
 # https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/
+# change Docker engine cgroup /etc/docker/daemon.json
+# {
+#  "exec-opts": ["native.cgroupdriver=systemd"]
+# }
+# sudo echo '{"exec-opts": ["native.cgroupdriver=systemd"]}' >> /etc/docker/daemon.json
+sudo systemctl restart docker
+
 sudo kubeadm init --config kubeadm-config.yaml
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -120,5 +127,4 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manif
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
 
 kubectl apply -f metallb.yaml
-
 ```
