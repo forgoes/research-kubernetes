@@ -49,6 +49,9 @@ reboot
 ## install kubeadm kubelet kubectl
 ```shell
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
 EOF
