@@ -99,6 +99,8 @@ sudo rm -rf $HOME/.kube
 #  "exec-opts": ["native.cgroupdriver=systemd"]
 # }
 # sudo echo '{"exec-opts": ["native.cgroupdriver=systemd"]}' >> /etc/docker/daemon.json
+sudo rm /etc/containerd/config.toml
+sudo systemctl restart containerd
 sudo systemctl restart docker
 
 sudo kubeadm init --config kubeadm-config.yaml

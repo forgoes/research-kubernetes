@@ -1,6 +1,6 @@
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
-kubernetesVersion: v1.23.5
+kubernetesVersion: v1.24.1
 networking:
   podSubnet: "172.16.0.0/12"
 
