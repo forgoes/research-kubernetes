@@ -9,6 +9,14 @@ sudo apt install lrzsz
 sudo apt install unzip
 ```
 
+## install ipvs
+```shell
+# https://installati.one/ubuntu/20.04/ipvsadm/
+# https://devopstales.github.io/kubernetes/k8s-ipvs/
+sudo apt-get update
+sudo apt-get -y install ipvsadm
+```
+
 ## install Docker
 ```shell
 sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -122,6 +130,9 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 watch kubectl get pods --all-namespaces
 kubectl cluster-info
 kubectl get nodes -o wide
+
+# ipvs
+sudo ipvsadm -Ln
 
 # install metallb for bare metal load balance
 # https://metallb.universe.tf/ 
