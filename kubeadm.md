@@ -135,8 +135,19 @@ kubectl get nodes -o wide
 sudo ipvsadm -Ln
 
 # UI
+# https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+# https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
-kubectl proxy
+
+kubectl create -f admin-user.yaml
+kubectl create -f role.yaml
+kubectl -n kubernetes-dashboard create token admin-user
+
+# delete
+kubectl -n kubernetes-dashboard delete serviceaccount admin-user
+kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
+
+kubectl proxy --address='0.0.0.0' --port=8001
 # http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
 
 # install metallb for bare metal load balance
