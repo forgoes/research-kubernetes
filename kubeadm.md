@@ -135,20 +135,31 @@ kubectl get nodes -o wide
 sudo ipvsadm -Ln
 
 # UI
-# https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
-# https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
+# https://sondnpt00343.medium.com/deploying-a-publicly-accessible-kubernetes-dashboard-v2-0-0-betax-8e39680d4067
 
-kubectl create -f admin-user.yaml
-kubectl create -f role.yaml
-kubectl -n kubernetes-dashboard create token admin-user
+# ssl
+openssl genrsa -out dashboard.key 2048
+openssl rsa -in dashboard.key -out dashboard.key
+openssl req -sha256 -new -key dashboard.key -out dashboard.csr -subj '/CN=localhost'
+openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
+# k8s
+kubectl create namespace kubernetes-dashboard
+kubectl create secret generic kubernetes-dashboard-certs --from-file=dashboard.key --from-file=dashboard.crt -n kubernetes-dashboard
+
+kubectl create -f kubernetes-dashboard.yaml
+kubectl get pods -A -o wide
+kubectl get service -n kubernetes-dashboard -o wide
+
+kubectl create -f dashboard-admin.yaml
+kubectl create -f dashboard-admin-bind-cluster-role.yaml
+
+kubectl create serviceaccount dashboard-admin -n kube-system
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
+kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
 
 # delete
-kubectl -n kubernetes-dashboard delete serviceaccount admin-user
-kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
-
-kubectl proxy --address='0.0.0.0' --port=8001
-# http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+kubectl -n kubernetes-dashboard delete serviceaccount dashboard-admin
+kubectl -n kubernetes-dashboard delete clusterrolebinding dashboard-admin
 
 # install metallb for bare metal load balance
 # https://metallb.universe.tf/ 
