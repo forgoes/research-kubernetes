@@ -144,7 +144,7 @@ openssl req -sha256 -new -key dashboard.key -out dashboard.csr -subj '/CN=localh
 openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
 # k8s
 kubectl create namespace kubernetes-dashboard
-kubectl create secret generic kubernetes-dashboard-certs --from-file=dashboard.key --from-file=dashboard.crt -n kubernetes-dashboard
+kubectl create secret generic kubernetes-dashboard-certs --from-file=certs/dashboard.key --from-file=certs/dashboard.crt -n kubernetes-dashboard
 
 kubectl create -f kubernetes-dashboard.yaml
 kubectl get pods -A -o wide
