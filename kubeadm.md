@@ -140,7 +140,7 @@ sudo ipvsadm -Ln
 # ssl
 openssl genrsa -out dashboard.key 2048
 openssl rsa -in dashboard.key -out dashboard.key
-openssl req -sha256 -new -key dashboard.key -out dashboard.csr -subj '/CN=localhost'
+openssl req -sha256 -new -key dashboard.key -out dashboard.csr -subj '/CN=jayden-k8s-master'
 openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
 # k8s
 kubectl create namespace kubernetes-dashboard
@@ -155,11 +155,14 @@ kubectl create -f dashboard-admin-bind-cluster-role.yaml
 
 kubectl create serviceaccount dashboard-admin -n kube-system
 kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
-kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
+kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboard get secret | awk '/dashboard-admin/{print $1}')
 
 # delete
 kubectl -n kubernetes-dashboard delete serviceaccount dashboard-admin
 kubectl -n kubernetes-dashboard delete clusterrolebinding dashboard-admin
+
+kubectl -n kubernetes-dashboard delete secret generic kubernetes-dashboard-certs
+kubectl delete -f kubernetes-dashboard.yaml
 
 # install metallb for bare metal load balance
 # https://metallb.universe.tf/ 
