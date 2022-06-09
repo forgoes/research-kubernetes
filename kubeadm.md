@@ -134,32 +134,30 @@ kubectl get nodes -o wide
 # ipvs
 sudo ipvsadm -Ln
 
-# UI
-# https://sondnpt00343.medium.com/deploying-a-publicly-accessible-kubernetes-dashboard-v2-0-0-betax-8e39680d4067
-
-# ssl
-# https://github.com/kubernetes/dashboard/blob/master/docs/user/certificate-management.md
-openssl genrsa -des3 -passout pass:over4chars -out dashboard.pass.key 2048
-openssl rsa -passin pass:over4chars -in dashboard.pass.key -out dashboard.key
-rm dashboard.pass.key
-openssl req -new -key dashboard.key -out dashboard.csr
-openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
-
-# k8s
+# dashboard
 kubectl create namespace kubernetes-dashboard
+## ssl
+git clone https://github.com/OpenVPN/easy-rsa
+cd easy-rsa/easyrsa3
+./easyrsa init-pki
+./easyrsa build-ca
+./easyrsa --subject-alt-name='DNS:*.dashboard,DNS:*.dashboard.k8s,DNS:*.dashboard.k8s.svc,DNS:*.dashboard.k8s.svc.cluster.local,DNS:dashboard-srv,DNS:dashboard-srv.k8s,DNS:dashboard-srv.k8s.svc,DNS:*.dashboard-srv.k8s.svc.cluster.local,DNS:localhost' build-server-full dashboard nopass
+### copy pki/ca.crt to your machine & trust in key chain
+### copy pki/private/dashboard.key pki/issued/dashboard.crt to ./certs
 kubectl create secret generic kubernetes-dashboard-certs --from-file=certs -n kubernetes-dashboard
-
-# https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
+## create dashboard
 kubectl create -f kubernetes-dashboard.yaml
 kubectl get pods -A -o wide
 kubectl get service -n kubernetes-dashboard -o wide
+kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboard get secret | awk '/kubernetes-dashboard/{print $1}')
 
-kubectl create -f dashboard-admin.yaml
-kubectl create -f dashboard-admin-bind-cluster-role.yaml
+# https://github.com/kubernetes/dashboard/blob/master/docs/user/certificate-management.md
+# https://sondnpt00343.medium.com/deploying-a-publicly-accessible-kubernetes-dashboard-v2-0-0-betax-8e39680d4067
+# https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 
 kubectl create serviceaccount dashboard-admin -n kube-system
 kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
-kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboard get secret | awk '/dashboard-admin/{print $1}')
+
 
 # delete
 kubectl -n kubernetes-dashboard delete serviceaccount dashboard-admin

@@ -13,13 +13,6 @@
 # limitations under the License.
 
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: kubernetes-dashboard
-
----
-
-apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
@@ -47,14 +40,14 @@ spec:
 
 ---
 
-apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard-certs
-  namespace: kubernetes-dashboard
-type: Opaque
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   labels:
+#     k8s-app: kubernetes-dashboard
+#   name: kubernetes-dashboard-certs
+#   namespace: kubernetes-dashboard
+# type: Opaque
 
 ---
 
@@ -198,10 +191,10 @@ spec:
             - containerPort: 8443
               protocol: TCP
           args:
-            - --auto-generate-certificates
+            # - --auto-generate-certificates
             - --namespace=kubernetes-dashboard
-            - --tls-cert-file=/certs/dashboard.crt
-            - --tls-key-file=/certs/dashboard.key
+            - --tls-cert-file=dashboard.crt
+            - --tls-key-file=dashboard.key
             # Uncomment the following line to manually specify Kubernetes API server Host
             # If not specified, Dashboard will attempt to auto discover the API server and connect
             # to it. Uncomment only if the default does not work.
