@@ -146,25 +146,26 @@ cd easy-rsa/easyrsa3
 ### copy pki/private/dashboard.key pki/issued/dashboard.crt to ./certs
 kubectl create secret generic kubernetes-dashboard-certs --from-file=certs -n kubernetes-dashboard
 ## create dashboard
+### https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 kubectl create -f kubernetes-dashboard.yaml
-kubectl get pods -A -o wide
-kubectl get service -n kubernetes-dashboard -o wide
-kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboard get secret | awk '/kubernetes-dashboard/{print $1}')
-
-# https://github.com/kubernetes/dashboard/blob/master/docs/user/certificate-management.md
-# https://sondnpt00343.medium.com/deploying-a-publicly-accessible-kubernetes-dashboard-v2-0-0-betax-8e39680d4067
-# https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
-
+# create account
 kubectl create serviceaccount dashboard-admin -n kube-system
 kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
-
+### admin account
+kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}')
+### other account
+kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboard get secret | awk '/kubernetes-dashboard/{print $1}')
+### show
+kubectl get pods -A -o wide
+kubectl get service -n kubernetes-dashboard -o wide
 
 # delete
-kubectl -n kubernetes-dashboard delete serviceaccount dashboard-admin
-kubectl -n kubernetes-dashboard delete clusterrolebinding dashboard-admin
+kubectl -n kube-system delete clusterrolebinding dashboard-admin
+kubectl -n kube-system delete serviceaccount dashboard-admin
 
-kubectl -n kubernetes-dashboard delete secret kubernetes-dashboard-certs
 kubectl delete -f kubernetes-dashboard.yaml
+kubectl -n kubernetes-dashboard delete secret kubernetes-dashboard-certs
+
 
 # install metallb for bare metal load balance
 # https://metallb.universe.tf/ 
