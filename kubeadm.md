@@ -138,14 +138,18 @@ sudo ipvsadm -Ln
 # https://sondnpt00343.medium.com/deploying-a-publicly-accessible-kubernetes-dashboard-v2-0-0-betax-8e39680d4067
 
 # ssl
-openssl genrsa -out dashboard.key 2048
-openssl rsa -in dashboard.key -out dashboard.key
-openssl req -sha256 -new -key dashboard.key -out dashboard.csr -subj '/CN=jayden-k8s-master'
+# https://github.com/kubernetes/dashboard/blob/master/docs/user/certificate-management.md
+openssl genrsa -des3 -passout pass:over4chars -out dashboard.pass.key 2048
+openssl rsa -passin pass:over4chars -in dashboard.pass.key -out dashboard.key
+rm dashboard.pass.key
+openssl req -new -key dashboard.key -out dashboard.csr
 openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
+
 # k8s
 kubectl create namespace kubernetes-dashboard
-kubectl create secret generic kubernetes-dashboard-certs --from-file=certs/dashboard.key --from-file=certs/dashboard.crt -n kubernetes-dashboard
+kubectl create secret generic kubernetes-dashboard-certs --from-file=certs -n kubernetes-dashboard
 
+# https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 kubectl create -f kubernetes-dashboard.yaml
 kubectl get pods -A -o wide
 kubectl get service -n kubernetes-dashboard -o wide
@@ -161,7 +165,7 @@ kubectl describe secrets -n kubernetes-dashboard $(kubectl -n kubernetes-dashboa
 kubectl -n kubernetes-dashboard delete serviceaccount dashboard-admin
 kubectl -n kubernetes-dashboard delete clusterrolebinding dashboard-admin
 
-kubectl -n kubernetes-dashboard delete secret generic kubernetes-dashboard-certs
+kubectl -n kubernetes-dashboard delete secret kubernetes-dashboard-certs
 kubectl delete -f kubernetes-dashboard.yaml
 
 # install metallb for bare metal load balance
