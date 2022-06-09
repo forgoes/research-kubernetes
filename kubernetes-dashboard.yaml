@@ -41,14 +41,14 @@ spec:
 
 ---
 
-apiVersion: v1
-kind: Secret
-metadata:
-  labels:
-    k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard-certs
-  namespace: kubernetes-dashboard
-type: Opaque
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   labels:
+#     k8s-app: kubernetes-dashboard
+#   name: kubernetes-dashboard-certs
+#   namespace: kubernetes-dashboard
+# type: Opaque
 
 ---
 
@@ -194,6 +194,10 @@ spec:
           args:
             - --auto-generate-certificates
             - --namespace=kubernetes-dashboard
+            - --token-ttl=3600
+            - --bind-address=0.0.0.0
+            - --tls-cert-file=certs/dashboard.crt
+            - --tls-key-file=certs/dashboard.key
             # Uncomment the following line to manually specify Kubernetes API server Host
             # If not specified, Dashboard will attempt to auto discover the API server and connect
             # to it. Uncomment only if the default does not work.
